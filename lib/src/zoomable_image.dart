@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 
 // Given a canvas and an image, determine what size the image should be to be
 // contained in but not exceed the canvas while preserving its aspect ratio.
-Size _containmentSize(Size canvas, Size image) {}
+// Size _containmentSize(Size canvas, Size image) {}
 
 class ZoomableImage extends StatefulWidget {
   final ImageProvider image;
@@ -52,6 +52,8 @@ class _ZoomableImageState extends State<ZoomableImage> {
   double _scale; // multiplier applied to scale the full image
 
   Orientation _previousOrientation;
+
+  ImageStreamListener imageStreamListener;
 
   Size _canvasSize;
 
@@ -171,7 +173,7 @@ class _ZoomableImageState extends State<ZoomableImage> {
 
   void _resolveImage() {
     _imageStream = widget.image.resolve(createLocalImageConfiguration(context));
-    _imageStream.addListener(_handleImageLoaded);
+    _imageStream.addListener(imageStreamListener);
   }
 
   void _handleImageLoaded(ImageInfo info, bool synchronousCall) {
@@ -182,8 +184,16 @@ class _ZoomableImageState extends State<ZoomableImage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    imageStreamListener = ImageStreamListener(
+      _handleImageLoaded,
+    );
+  }
+
+  @override
   void dispose() {
-    _imageStream.removeListener(_handleImageLoaded);
+    _imageStream.removeListener(imageStreamListener);
     super.dispose();
   }
 }
